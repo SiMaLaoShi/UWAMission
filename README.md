@@ -133,3 +133,39 @@
 ### 持续分配内存过高
 
 # Mission3
+
+## Mecanim动画
+
+#### Animator CullMode
+
+- Always Animatre （不管是不是在视椎体下面都进行更新 UGUI需要）
+- Cull Update Transforms （不在视椎体下面不更新 Retarget IK 和回传的Transform信息）
+- Cull Completely （不在视椎体下面什么都不更新）
+
+#### Opeimize Game Object
+
+- 游戏中Native层的骨骼信息不会回传到C#层
+- Animator.WiriteJob
+- MeshSkinning.Update
+- MeshSkinning.CalcMatrices
+
+#### Apply Root Motion
+
+- 对于不更新Root节点的可以勾选
+
+#### Compute Skinning
+
+- 使用GPU来进行动画加速
+
+#### Animator.Initialize
+
+- 使用其他方式来代替 SetGameObject控制Animator
+
+
+
+
+
+
+
+
+

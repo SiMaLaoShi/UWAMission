@@ -161,7 +161,125 @@
 
 - 使用其他方式来代替 SetGameObject控制Animator
 
+### Legacy动画
 
+#### Culling Type
+
+- Always Animate 不管什么时候都执行
+- Based On Renderers 只执行视椎体下的
+
+#### 实例化/激活
+
+- 使用其他方式代替SetActive
+- 逻辑上可以用禁用组件的方式来实现
+- 表现上可以用设置Position、Scale来实现
+- Animation.Sample
+- Animation.RebuildInternalState
+
+#### AddClip
+
+- ​	不需要重复的添加AddClip
+
+# Mission4
+
+## 物理模块的耗时
+
+### 概述
+
+#### 系统选择
+
+- 内置3D物理系统（Nvidia PhysX引擎）
+- 内置2D物理系统 （Box2D引擎）
+
+#### CPU耗时
+
+##### FixedUpdate.PhysiceFixedUpdate
+
+- Physice.Processing
+- Physics.Simulate
+
+#### 逻辑代码
+
+- OnTriggerEnter、OnCollistionEnter等碰撞事件
+- RayCast、Overlap等检测函数
+
+#### 堆内存
+
+- OnTriggerEnter等回调会产生Collision的实例，会分配到堆内存，产生GC
+- RayCast等检测函数会返回物体的实例分配到堆内存
+
+### 物理模拟
+
+#### Auto  Simulation
+
+- Edit>Project Seting>Physics中开启或者关闭
+- 使用Physics.autoSimulation来控制
+- Auto Sync Transform 开启改选项，会让每次Transform属性发生变化时，强制与物理系统进行同步，可以Physics.SyncTransforms手动同步进行修改，如果需要使用射线检测，则需要开始AutoSyncTransform选项
+
+### 物理碰撞
+
+#### 碰撞体组件Collider
+
+- 碰撞体Collider定义了游戏对象中用于物理碰撞的形状，它是不可见的，并不需要合游戏对象的网格完全相同
+- Box、Capsule、Sphere Collider形状简单，开销最低
+- Mesh Collider 能够精确匹配游戏对象网格的形状，但是开销最大
+- 尽量不用使用Mesh Collider，可以用多个简单的碰撞体做复合碰撞
+- 如果一定要使用MeshCollider，建议开启Play Setting中的Prebake Collider选项
+
+#### 触发器
+
+- 在每个Collider组件中都存在Is Trigger属性，默认是关闭的
+- 如果开起了Is Trigger属性，那么就不会发生物理碰撞
+- Trigger对象可以通过 OnTriggerEnter/Stay/Exit函数进行回调
+- Collider对象可以通过OnColliderEnter/Stay/Exit函数进行回调
+- 不需要碰撞效果的可以勾选
+- 可以使用Collider.Bounds来进行碰撞检查
+
+#### 刚体组件 Rigidbody
+
+- 添加组件后，对象会立即相应重力，一般同时还会添加碰撞体组件，这样对象就会因为碰撞而移动
+- 刚体组件接管改对象的运动，因此不建议直接修改Transform的属性，这会导致物理世界重新计算
+- 使用MovePostion或者AddForce函数之类的方法来移动游戏对象
+- 最好在FixedUpdate进行更新而不是Update
+
+#### 运动刚体 Is Kinematic
+
+- 默认不开启的情况下Rigidbody完全由物理引擎控制
+- 开启后会让物体摆脱物理引擎控制，允许使用脚本进行控制
+- Kinematic对象不会相应碰撞或力，但依然会对其他刚体对象施加物理影响
+- Rigidbody的对象越多开销越大，二Kinematic的开销比Rigidbody小
+- 可以动态切换 Is Kinematic的属性来某个对象关闭物理引擎，不过也会产生开销
+
+#### 碰撞操作矩阵
+
+- ![img](Img/9.jpg)
+
+### 物理更新次数
+
+- 如果某帧耗时过高，同样会更新次数会过高
+- 在每一帧开始前，Unity会根据需要执行更多的FixedUpdate，以赶上当前时间
+- Fixed Timestep 物理模型的更新间隔 （0.02s）
+- Maxumum Allowed Timestep 执行物理计算和FixedUpdate的事件的时间长度不会超过指定值 （0.333）
+- 默认改值为0.333秒，固定时间为0.02s，则最大调用次数为17次（一般建议在8~10个Fps之间）
+
+### 堆内存
+
+- 碰撞产生的堆内存
+- 开启Physics设置中的Reuse Collider Callbacks 碰撞产生的对象重复使用一个instance减少GC
+- 使用对应的Non-alloc版本，这些需要预先分配一个较大的容器来返回结果
+- RaycastNonAlloc
+- BoxCastNonAlloc
+- OverlapBoxNonAlloc
+
+### 其他
+
+- Broadphase Type 使用合适的收集算法
+- Default Solver Iterations 解算器数量，默认6，使用合适的值来进行优化，该值越大碰撞越精确但是开销也越大
+- 用RaycastCommand来代替Raycast把工作交给Job线程来减轻主线程的压力
+
+## 物理模块堆内存
+
+### 2.1NonAlloc物理API
 
 
 

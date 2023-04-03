@@ -281,9 +281,102 @@
 
 ### 2.1NonAlloc物理API
 
+# Mission5
 
+## 热点函数
 
+### Canvas.SendWillRenderCanvases
 
+- UI元素的本身某些属性发生变化，从而需要更新
 
+#### UIVertex
 
+- color
+- normal
+- position
+- uvo
+- uv1
+- uv2
+- uv3
 
+### BuildBatch & EmitWorldScreenspaceCameraGeometry
+
+- BuildBatch
+- EmitWorldScreenspaceCameraGeometry 主线程等待子线程合并网格的时间
+- 优化就是动静分离了
+
+### SyncTransform
+
+- SetActivie 导致的，使用其他替代方法就行了
+- 对某个元素使用SetActive(true)会导致与其他父节点同一层级的UI元素也发生SyncTransform
+
+### EventSystem.Update
+
+- 取消勾选不需要的RayCast Target
+
+## DrawCall优化
+
+### 图集合并
+
+- 就是打图集了
+
+### 避免层级穿插
+
+- 相交增加层级，重叠打断合批
+
+### Z =0
+
+- 子节点Pos Z 不为0，合批还会受到Hierarchy的影响
+- 尽量把Pos Z设置为0
+
+# Mission6
+
+## Loading.UpdatePreloading
+
+- Shader解析和编译，Shader需要编译成公共ab，不然没加载一次ab就需要一次Shader.Parse，当然也可以做Cache
+- Resources.UnloadUnusedAssets 这个Api主要是卸载当前未被使用的Asset，耗时主要在于收集Hierarchy面板，而不在于GC，切场景也会触发，如果不切建议5-10分钟来一次
+
+#### 异步加载优先级
+
+- Application.backgroundLoadingPriority
+- 限制主线程的集成时间
+- 单帧内最长可用的异步操作时间
+- ThreadPriority.Low （2ms）
+- ThreadPriority.BelowNorml（4ms默认设置）
+- ThreadPriority.Normal （10ms）
+- ThreadPriority.High （50ms）
+- 如果是在Loading过程中建议用High其他用正常，就是带Loading界面建议用High。
+
+## 加载api
+
+### 加载卸载AssetBundle
+
+- LoadFormFile：用于从本地加载ab包
+- LoadFormSteam：用于ab包需要加密的情况
+- DownLoadHandlerAssetBundle：用于从网络上下载ab包（热更新）
+
+![image-20230403144748162](Img/image-20230403144748162.png)
+
+### 加载卸载资源
+
+#### ab压缩方式
+
+- BuildAssetBundleOptions.None：使用LZMA算法压缩
+- BuildAssetBundleOptions.ChunkBasedCompression：使用LZ算法压缩
+- LZMA：steam-based，只支持随机读取，加载需要把整个包解压
+- LZ4：chunk-based，支持随机读取，加载速度快
+
+#### 压缩SteamAsset
+
+- Unity 2018可通过修改gradle文件压缩该目录 **STREAMING_ASSETS**
+- Unity 2020以后不压缩改目录
+
+![image-20230403145213953](Img/image-20230403145213953.png)
+
+### 实例化和销毁对象
+
+- 就是使用对象池优化了
+
+### 激活和隐藏对象
+
+- 就是使用其他方法实现SetActive的效果，比如修改缩放，位置以及禁用组件

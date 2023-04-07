@@ -341,6 +341,7 @@
 - RayCast等检测函数会返回物体的实例分配到堆内存
 
 ### 物理模拟
+
 #### Auto  Simulation
 
 - Edit>Project Seting>Physics中开启或者关闭
@@ -360,7 +361,7 @@
 #### 触发器
 
 - 在每个Collider组件中都存在Is Trigger属性，默认是关闭的
-
+- 如果开起了Is Trigger属性，那么就不会发生物理碰撞
 - Trigger对象可以通过 OnTriggerEnter/Stay/Exit函数进行回调
 - Collider对象可以通过OnColliderEnter/Stay/Exit函数进行回调
 - 不需要碰撞效果的可以勾选
@@ -381,9 +382,9 @@
 - Rigidbody的对象越多开销越大，二Kinematic的开销比Rigidbody小
 - 可以动态切换 Is Kinematic的属性来某个对象关闭物理引擎，不过也会产生开销
 
-<summary>Mission2</summary>
+#### 碰撞操作矩阵
 
-- [策略导致的内存问题](#策略导致的内存问题)g)
+- ![img](Img/9.jpg)
 
 ### 物理更新次数
 
@@ -404,7 +405,7 @@
 
 ### 其他
 
-    - [1.1资源冗余](#11资源冗余)dphase Type 使用合适的收集算法
+- Broadphase Type 使用合适的收集算法
 - Default Solver Iterations 解算器数量，默认6，使用合适的值来进行优化，该值越大碰撞越精确但是开销也越大
 - 用RaycastCommand来代替Raycast把工作交给Job线程来减轻主线程的压力
 
@@ -422,9 +423,9 @@
 
 #### UIVertex
 
-- colo
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
+- color
+- normal
+- position
 - uvo
 - uv1
 - uv2
@@ -439,210 +440,210 @@
 ### SyncTransform
 
 - SetActivie 导致的，使用其他替代方法就行了
-- 对某个元素使用SetActive(true
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
+- 对某个元素使用SetActive(true)会导致与其他父节点同一层级的UI元素也发生SyncTransform
+
+### EventSystem.Update
+
 - 取消勾选不需要的RayCast Target
 
+## DrawCall优化
 
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compress
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|STA
-        - [ForceToMono](#forcetomono)
-        - [Load
-        - [ForceToMono](#forcetomono)
-     
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtyp
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        
-        - 
-        - [ForceToM
-    
-        - [ForceToMono](#
-        - [ForceToMono](#for
-        - [ForceToMono](#forcetomono)
-       
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#
-        - [
-    
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+### 图集合并
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模块推荐值](#13渲染模块推荐值)
-- [性能排查工具](#性能排查工具)
-    - [2.1Unity Profiler](#21unity-profiler)
-    - [2.2Unity FrameDebugger](#22unity-framedebugger)
-    - [2.3Mali Offline Compiler](#23mali-offline-compiler)
-    - [2.4XCode FrameDebugger](#24xcode-framedebugger)
-    - [2.5GOT OnLine](#25got-online)
-</details>
+- 就是打图集了
 
-        - [ForceToMono](#forcetomo
-        - [ForceToMono](#fo
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+### 避免层级穿插
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+- 相交增加层级，重叠打断合批
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模块推荐值](#13渲染模块推荐值)
-- [性能排查工具](#性能排查工具)
-    - [2.1Unity Profiler](#21unity-profiler)
-    - [2.2Unity FrameDebugger](#22unity-framedebugger)
-    - [2.3Mali Offline Compiler](#23mali-offline-compiler)
-    - [2.4XCode FrameDebugger](#24xcode-framedebugger)
-    - [2.5GOT OnLine](#25got-online)
-</details>
+### Z =0
 
-<details>
-<summary>Mission2</summary>
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+- 子节点Pos Z 不为0，合批还会受到Hierarchy的影响
+- 尽量把Pos Z设置为0
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模块推荐值](#13渲染模块推荐值)
-- [性能排查工具](#性能排查工具)
-    - [2.1Unity Profiler](#21unity-profiler)
-    - [2.2Unity FrameDebugger](#22unity-framedebugger)
-    - [2.3Mali Offline Compiler](#23mali-offline-compiler)
-    - [2.4XCode FrameDebugger](#24xcode-framedebugger)
-    - [2.5GOT OnLine]
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+# Mission6
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#l
-        - [ForceToMono](#forcetomono)
-     
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+## Loading.UpdatePreloading
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模块推荐值](#13渲染模块推荐值)
-- [性能排查工具](#性能排查工具)
-    - [2.1Unity Profiler](#21unity-profiler)
-    - [2.2Unity FrameDebugger](#22unity-framedebugger)
-    - [2.3Mali Offline Compiler](#23mali-offline-compiler)
-    - [2.4XCode FrameDebugger](#24xcode-framedebugger)
-    - [2.5GOT OnLine](#25got-online)
-</details>
+- Shader解析和编译，Shader需要编译成公共ab，不然没加载一次ab就需要一次Shader.Parse，当然也可以做Cache
+- Resources.UnloadUnusedAssets 这个Api主要是卸载当前未被使用的Asset，耗时主要在于收集Hierarchy面板，而不在于GC，切场景也会触发，如果不切建议5-10分钟来一次
 
-<details>
-<summary>Mission2</summary>
+#### 异步加载优先级
 
-- [策略导致的内存问题](#策略导致的内存问题)
-    - [1.1资源冗余](#11资源冗余)
-    - [1.2代码生成的资源](#12代码生成的资源)
-    - [1.3加载和缓存策略](#13加载和缓存策略)
-- [Gfx内存](#gfx内存)
-    - [1.1纹理资源](#11纹理资源)
-        - [Texture Quality](#texture-quality)
-        - [Texture Steam](#texture-steam)
-    - [1.2网格资源](#12网格资源)
-    - [1.3Shader资源](#13shader资源)
-- [Reserved Unity](#reserved-unity)
-    - [1.1RenderTexture资源](#11rendertexture资源)
-    - [1.2动画资源](#12动画资源)
-    - [1.3音频资源](#13音频资源)
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression-format)
-    - [1.4字体资源](#14字体资源)
-    - [1.5粒子资源](#15粒子资源)
-</details>
+- Application.backgroundLoadingPriority
+- 限制主线程的集成时间
+- 单帧内最长可用的异步操作时间
+- ThreadPriority.Low （2ms）
+- ThreadPriority.BelowNorml（4ms默认设置）
+- ThreadPriority.Normal （10ms）
+- ThreadPriority.High （50ms）
+- 如果是在Loading过程中建议用High其他用正常，就是带Loading界面建议用High。
 
-<details>
-<summary>Mission3</summary>
+## 加载api
 
-- [Mecanim动画](#mecanim动画)
-    - [Animator CullMode](#animator-cullmode)
-    - [Opeimize Game Object](#opeimize-game-object)
-    - [Apply Root Motion](#apply-root-motion)
-    - [Compute Skinning](#compute-skinning)
-    - [Animator.Initialize](#animatorinitialize)
-- [Legacy动画](#legacy动画)
-    - [Culling Type](#culling-type)
-    - [实例化/激活](#实例化激活)
-    - [AddClip](#addclip)
-</details>
+### 加载卸载AssetBundle
 
-<details>
-<summary>Mission4</summary>
+- LoadFormFile：用于从本地加载ab包
+- LoadFormSteam：用于ab包需要加密的情况
+- DownLoadHandlerAssetBundle：用于从网络上下载ab包（热更新）
 
-- [物理模块的耗时](#物理模块的耗时)
-    - [概述](#概述)
-        - [系统选择](#系统选择)
-        - [ForceToMono](#forcetomono)
-        - [LoadType](#loadtype)
-        - [Compression Format](#compression<|START|>
-```H:\Git\UWAMission\README.md
-<details>
-<summary>Mission1</summary>
+![image-20230403144748162](Img/image-20230403144748162.png)
 
-- [性能指标](#性能指标)
-    - [1.1耗时推荐值](#11耗时推荐值)
-    - [1.2内存推荐值](#12内存推荐值)
-    - [1.3渲染模块推荐值](#13渲染模块推荐值)
-- [性能排查工具](#性能排查工具)
+### 加载卸载资源
+
+#### ab压缩方式
+
+- BuildAssetBundleOptions.None：使用LZMA算法压缩
+- BuildAssetBundleOptions.ChunkBasedCompression：使用LZ算法压缩
+- LZMA：steam-based，只支持随机读取，加载需要把整个包解压
+- LZ4：chunk-based，支持随机读取，加载速度快
+
+#### 压缩SteamAsset
+
+- Unity 2018可通过修改gradle文件压缩该目录 **STREAMING_ASSETS**
+- Unity 2020以后不压缩改目录
+
+![image-20230403145213953](Img/image-20230403145213953.png)
+
+### 实例化和销毁对象
+
+- 就是使用对象池优化了
+
+### 激活和隐藏对象
+
+- 就是使用其他方法实现SetActive的效果，比如修改缩放，位置以及禁用组件
+
+# Mission7
+
+## 渲染模块CPU的压力
+
+### Static Batching
+
+- 采用了以空间换时间的的策略来提升渲染效率
+- 节省下来的调用DrawCall之前的准备工作的时间以及计算资源
+- 适用场景（静态物体、Mesh重复率不高、材质重复率不高）
+- 为什么这个能优化，因为节省了顶点信息的绑定，几何信息的传递，相邻材质相同时，节省材质传递
+
+#### 代价
+
+- 合并后的CombineMesh 过大，导致包体过大
+- 如果是在运行时合并会导致一次CPU峰值，因为要计算网格
+- 合并的后的Mesh一定比原来的Mesh要大所有内存也会比之前高
+
+### Dynamic Batching
+
+#### 优点
+
+- 相对于静态合批，它不会造成内存的额外开销
+- 可以运用于运动的物体
+- 对于UI比较容易满足条件
+
+#### 适用场景
+
+- 网格较少、几何体简单、如UI、粒子、Sprite等
+
+#### 合批类型
+
+- Meshs：针对网格的动态合批
+- Dynamically Generated Geometries：针对动态生成的几何体的动态合批
+
+#### 原理
+
+- 把一些较小的网格，在CPU转换他们的顶点空间到世界空间，将使用相同配置顶点组合在一起，然后一次性绘制他们
+
+#### 效果
+
+- 以最小的代价合并网格模型，以此来减少Draw Call
+- CPU会一直计算，所有能适用运动的物体
+- 虽然能节省Draw Call的开销，但是会带来CPU计算的开销
+
+#### 合批条件
+
+- 使用相同的材质实例
+- 网格的顶点数不能超过300，使用的顶点属性不能超过900
+- 动态光照贴图的GameObjects应指向完全相同的光照贴图位置
+- 使用多个Pass的Shader不会被动态合批处理
+
+### GPU Instancing
+
+##### 原理
+
+- Unity对于所有符合要求的对象，将其位置、缩放、uv偏移、lightmapindex等相关信息放到Constent Buffer常量缓冲区中
+- 当一个对象作为实例进入渲染流程中，会根据传入的Instance ID来从显存中取出对应的消息，用于后续的渲染
+- 在一个Draw Call中渲染有相同材质的、同一个Mesh的多个副本，每个副本被称为一个实例instance
+- 一次性存入所有公共对象到CBuffer，后续根据id来取，不用每次都发数据到GPU，以此实现优化的效果
+
+![image-20230407143313353](Img/image-20230407143313353.png)
+
+##### 使用条件
+
+- Shader必须支持GPU Instancing， Unity中的Standard、StandardSpecular以及所有的Surface Shader都默认支持
+- 其他的Shader可以手动添加GPU Instancing的支持
+- 使用同一个Mesh
+- 只支持MeshRenderer，不支持SkinnedMeshRenderer
+- 使用同一个Material
+
+##### 优点
+
+- 相比静态合批不会带来额外的内存压力
+- 相比动态合批没有严格的顶点限制
+- 与MaterialPropertyBlock很适配，不会打断合批
+- 需要画大批量相同Mesh的场景，比如草海树林之类的
+
+##### 缺点
+
+- 优先级比SRP Batcher和静态合批都要低，在满足这两种使用条件时GPU的Instancing都无法使用
+- 提交一次GPU Instancing的Draw Call耗时是正常的DrawCall的耗时要高不少的，因此若要使用GPU Instancing要确认开启改选项能让Draw Call大幅度下降的
+- 对于半透明物体严格要求从远到近渲染，合批很容易打断
+- 不适用Mesh种类多的场景
+
+#### 原理
+
+### SRP Batcher
+
+##### 优点
+
+- 节省Uniform Buffer的写入操作
+- 支持动态物体的，支持的范围要比静态合批更广泛，同时内存上的代价会小很多
+- 材质多的情况下也能使用
+
+##### 适用场景
+
+- Shader重复率搞，但是需要控制Shader变体的数量
+
+### 四种方式的对比
+
+##### 优先级
+
+- SRP Batcher和Static Batching兼容
+- SRP Battcher / Static Batching > GPU Instancing > Dynamic Batching
+
+##### 适用情况
+
+- Static Batching + SRP Batcher：主城，副本建筑
+- SRP Batcher Only：种类繁多的植被
+- GUP Instance：种类单一的植被
+- Dynamic Batching：UI，粒子，Sprite等
+
+### Culling
+
+#### Culling耗时相关函数
+
+- 视椎体剔除是Unity自带的一个剔除方案
+- 把一部分不需要进行渲染的对象进行剔除，这就是Culling
+- PrepareUpdateRendererBoundingVolumes
+- FinalizeUpdateRendererBuondingVolumes
+- PrepareSceneCullingParameters
+
+##### SceneCulling
+
+- PrepareSceneNodes
+- CullAllvisibleLights
+- CullSendEvents
+
+##### CullResults.CreateSharedRendererScen
+
+- BeginRenderQueueExtraction
 - EndRenderQueueExtraction
 - CullPerObjectLights
 
